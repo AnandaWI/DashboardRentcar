@@ -29,6 +29,7 @@ const PaginatedTable = ({ columns, endpoint, perPage = 10, showSearch = true, re
           q: getQueryParam('q') || '',
           ...(getQueryParam('is_used') !== null && { is_used: getQueryParam('is_used') }),
           ...(getQueryParam('order') !== null && { order: getQueryParam('order') }),
+          ...(getQueryParam('category_id') !== null && { category_id: getQueryParam('category_id') }),
         },
       })
 

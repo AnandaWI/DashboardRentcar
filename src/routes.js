@@ -2,8 +2,8 @@ import React from 'react'
 
 const AppHistory = React.lazy(() => import('./views/ManageAppHistory'))
 const Dashboard = React.lazy(() => import('./views/Dashboard'))
-const ManageCategory = React.lazy(() => import('./views/ManageCategory'))
-const ManageTag = React.lazy(() => import('./views/ManageTag'))
+const ManageCarCategory = React.lazy(() => import('./views/ManageCarCategory'))
+const ManageCar = React.lazy(() => import('./views/ManageCar'))
 const ManageAdmin = React.lazy(() => import('./views/ManageAdmin'))
 const ManagePemantau = React.lazy(() => import('./views/ManagePemantau'))
 const ManagePenyandang = React.lazy(() => import('./views/ManagePenyandang'))
@@ -11,13 +11,17 @@ const ManageBlindstick = React.lazy(() => import('./views/ManageBlindstick'))
 const Profile = React.lazy(() => import('./views/Profile'))
 const ManagePost = React.lazy(() => import('./views/ManagePost'))
 const ManagePostAdd = React.lazy(() => import('./views/ManagePostAdd'))
+const ManageService = React.lazy(() => import('./views/ManageService'))
+const ManageDriver = React.lazy(() => import('./views/ManageDriver'))
 
 const routes = [
   { path: '/', exact: true, name: 'Home', element: Dashboard },
   { path: '/app-history', name: 'App History', element: AppHistory, roles: ['superadmin'] },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
-  { path: '/manage-category', name: 'Manage Category', element: ManageCategory },
-  { path: '/manage-tag', name: 'Manage Tag', element: ManageTag },
+  { path: '/manage-car-category', name: 'Manage Car Category', element: ManageCarCategory },
+  { path: '/manage-car', name: 'Manage Car', element: ManageCar },
+  { path: '/manage-service', name: 'Manage Service', element: ManageService },
+  { path: '/manage-driver', name: 'Manage Driver', element: ManageDriver },
   { path: '/manage-post', name: 'Manage Post', element: ManagePost },
   { path: '/manage-post/add', name: 'Manage Post', element: ManagePostAdd },
   { path: '/manage-admin', name: 'Manage Admin', element: ManageAdmin, roles: ['superadmin'] },

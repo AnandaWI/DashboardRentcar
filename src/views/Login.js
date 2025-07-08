@@ -32,7 +32,7 @@ const Login = () => {
     setError([])
     try {
       const data = { email, password }
-      const response = await axiosInstance.post('/dashboard/auth/login', data)
+      const response = await axiosInstance.post('/api/login', data)
 
       localStorage.setItem('token', response.data.access_token)
       localStorage.setItem('user', JSON.stringify(response.data.user))

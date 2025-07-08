@@ -1,9 +1,9 @@
 import ManageAdmin from './ManageAdmin'
 import ManageBlindstick from './ManageBlindstick'
-import ManageCategory from './ManageCategory'
+import ManageCarCategory from './ManageCarCategory'
 import ManagePemantau from './ManagePemantau'
 import ManagePenyandang from './ManagePenyandang'
-import ManageTag from './ManageTag'
+import ManageCar from './ManageCar'
 import Dashboard from './Dashboard'
 import Login from './Login'
 import ManageAppHistory from './ManageAppHistory'
@@ -13,8 +13,8 @@ import ManagePostAdd from './ManagePostAdd'
 export {
   ManageAdmin,
   ManageBlindstick,
-  ManageCategory,
-  ManageTag,
+  ManageCarCategory,
+  ManageCar,
   ManagePemantau,
   ManagePenyandang,
   Dashboard,

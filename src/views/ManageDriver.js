@@ -5,8 +5,9 @@ import CrudModal from '../components/modals/CrudModal'
 import EditButton from '../components/buttons/EditButton'
 import DeleteButton from '../components/buttons/DeleteButton'
 import { useToast } from '../components/ToastManager'
+import ShowButton from '../components/buttons/ShowButton'
 
-const ManageCategory = () => {
+const ManageDriver = () => {
   const [modalVisible, setModalVisible] = useState(false)
   const [modalMode, setModalMode] = useState('store') // 'store', 'edit', 'delete'
   const [selectedId, setSelectedId] = useState(null)
@@ -37,7 +38,12 @@ const ManageCategory = () => {
 
   const columns = [
     { key: 'name', label: 'Name' },
-    { key: 'slug', label: 'Slug' },
+    { key: 'img_url', label: 'Foto', type: 'image', imagePath: 'img_url',
+      render: (item) => (
+        // <ShowButton onClick={() => {}} />
+        <a href={item.img_url} target='_blank' className='btn btn-primary'>Lihat</a>
+      ),
+     },
     {
       key: 'actions',
       label: 'Aksi',
@@ -50,18 +56,18 @@ const ManageCategory = () => {
     },
   ]
 
-  const endpoint = '/dashboard/manage-category'
-  const section = 'Category'
-  const fields = [{ name: 'name', label: 'Nama Category', type: 'text' }]
+  const endpoint = '/api/driver'
+  const section = 'Driver'
+  const fields = [{ name: 'data.name', label: 'Nama Driver', type: 'text' },{ name: 'img_url', label: 'Foto', type: 'file', location: 'drivers'}]
 
   return (
     <>
       <CCard className="mb-4 p-4">
         <CCardBody className="d-flex flex-column gap-4">
           <div className="d-flex justify-content-between align-items-center">
-            <h4>Manage Category</h4>
+            <h4>Manage Driver</h4>
             <CButton color="primary" className="p-2 px-3 fw-medium" onClick={handleAdd}>
-              Tambah Category
+              Tambah Driver
             </CButton>
           </div>
 
@@ -99,4 +105,4 @@ const ManageCategory = () => {
   )
 }
 
-export default ManageCategory
+export default ManageDriver

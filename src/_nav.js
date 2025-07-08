@@ -25,24 +25,30 @@ const getNav = (roles = []) => {
     },
     {
       component: CNavTitle,
-      name: 'CMS',
+      name: 'MASTER DATA',
     },
     {
       component: CNavItem,
-      name: 'Manage Category',
-      to: '/manage-category',
+      name: 'Manage Car Category',
+      to: '/manage-car-category',
       icon: <CIcon icon={cilList} customClassName="nav-icon" />,
     },
     {
       component: CNavItem,
-      name: 'Manage Tag',
-      to: '/manage-tag',
+      name: 'Manage Car',
+      to: '/manage-car',
       icon: <CIcon icon={cilTag} customClassName="nav-icon" />,
     },
     {
       component: CNavItem,
-      name: 'Manage Post',
-      to: '/manage-post',
+      name: 'Manage Service',
+      to: '/manage-service',
+      icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
+    },
+    {
+      component: CNavItem,
+      name: 'Manage Driver',
+      to: '/manage-driver',
       icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
     },
     {
