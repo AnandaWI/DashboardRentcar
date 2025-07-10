@@ -82,121 +82,124 @@ const CrudModal = ({
 
   const defaultHandleSubmit = async () => {
     // Validasi field
-    if ((isEdit || mode === 'store') && fields.some((f) => {
-      if (f.type === 'file') return false; 
-      return !formData[f.name];
-    })) {
-      onError?.('Semua field wajib diisi.');
-      return;
+    if (
+      (isEdit || mode === 'store') &&
+      fields.some((f) => {
+        if (f.type === 'file') return false
+        return !formData[f.name]
+      })
+    ) {
+      onError?.('Semua field wajib diisi.')
+      return
     }
-  
-    setSubmitting(true);
-    
+
+    setSubmitting(true)
+
     try {
       // Buat payload simpel dari formData
-      let simplePayload = buildPayload(formData);
-  
+      let simplePayload = buildPayload(formData)
+
       // Upload file dan update payload dengan public URL
       for (const field of fields) {
         if (field.type === 'file' && formData[field.name]) {
-          let fileObj = formData[field.name];
+          let fileObj = formData[field.name]
           if (fileObj instanceof FileList) {
-            if (fileObj.length === 0) continue;
-            fileObj = fileObj[0];
+            if (fileObj.length === 0) continue
+            fileObj = fileObj[0]
           }
           if (fileObj instanceof File) {
-            const locationPath = field.location || 'public/default';
-            const uploadedPath = await supabaseService.upload(locationPath, fileObj);
-            const publicUrl = supabaseService.getPublicUrl(uploadedPath);
-            simplePayload[field.name] = publicUrl;
+            const locationPath = field.location || 'public/default'
+            const uploadedPath = await supabaseService.upload(locationPath, fileObj)
+            const publicUrl = supabaseService.getPublicUrl(uploadedPath)
+            simplePayload[field.name] = publicUrl
           }
         }
       }
-  
-      let api;
+
+      let api
       if (isReset) {
-        api = axiosInstance.post(`${endpoint}/${id}/reset_password`);
+        api = axiosInstance.post(`${endpoint}/${id}/reset_password`)
       } else if (isDelete) {
-        api = axiosInstance.delete(`${endpoint}/${id}`);
+        api = axiosInstance.delete(`${endpoint}/${id}`)
       } else if (isEdit) {
-        api = axiosInstance.put(`${endpoint}/${id}`, simplePayload);
+        api = axiosInstance.put(`${endpoint}/${id}`, simplePayload)
       } else {
-        api = axiosInstance.post(endpoint, simplePayload);
+        api = axiosInstance.post(endpoint, simplePayload)
       }
-  
-      await api;
-      onSuccess?.();
-      onClose();
+
+      await api
+      onSuccess?.()
+      onClose()
     } catch (err) {
-      console.error('Submission failed:', err);
-      const errorMsg = err?.response?.data?.detail || err.message || 'Terjadi kesalahan. Coba lagi.';
-      onError?.(errorMsg);
+      console.error('Submission failed:', err)
+      const errorMsg = err?.response?.data?.detail || err.message || 'Terjadi kesalahan. Coba lagi.'
+      onError?.(errorMsg)
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
   }
-  
-  
+
   const buildNestedPayload = (flatData) => {
-    const result = {};
+    const result = {}
     Object.entries(flatData).forEach(([key, value]) => {
-      const keys = key.split('.');
-      let current = result;
+      const keys = key.split('.')
+      let current = result
       keys.forEach((k, i) => {
         if (i === keys.length - 1) {
-          current[k] = value;
+          current[k] = value
         } else {
-          if (!current[k]) current[k] = {};
-          current = current[k];
+          if (!current[k]) current[k] = {}
+          current = current[k]
         }
-      });
-    });
-    return result;
-  };
-  
+      })
+    })
+    return result
+  }
+
   const handleSubmit = async () => {
-    // flatFormData is object with keys like "data.name", "data.img_url" with file object in "data.img_url"
-    let flatFormData = getFormDataSomehow();
-  
     // Handle file upload and replace file on flatFormData with uploaded URL
-    for(const field of fields) {
-      if(field.type === 'file' && flatFormData[field.name]) {
-        let fileObject = flatFormData[field.name];
-        if(fileObject instanceof FileList) {
-          if(fileObject.length > 0) fileObject = fileObject[0];
+    for (const field of fields) {
+      if (field.type === 'file' && flatFormData[field.name]) {
+        let fileObject = flatFormData[field.name]
+        if (fileObject instanceof FileList) {
+          if (fileObject.length > 0) fileObject = fileObject[0]
         }
-        if(fileObject instanceof File) {
-          const location = field.location || 'public/default';
-          const uploadedPath = await supabaseService.upload(location, fileObject);
-          const publicUrl = supabaseService.getPublicUrl(uploadedPath);
-          flatFormData[field.name] = publicUrl; // Replace file object with URL string here
+        if (fileObject instanceof File) {
+          const location = field.location || 'public/default'
+          const uploadedPath = await supabaseService.upload(location, fileObject)
+          const publicUrl = supabaseService.getPublicUrl(uploadedPath)
+          flatFormData[field.name] = publicUrl // Replace file object with URL string here
         }
       }
     }
-  
+
     // Build nested object payload based on dot notation keys
-    const nestedPayload = buildNestedPayload(flatFormData);
-  
+    const nestedPayload = buildNestedPayload(flatFormData)
+
     // Send nestedPayload to API
-    await axiosInstance.post(endpoint, nestedPayload);
-  };
-  
+    await axiosInstance.post(endpoint, nestedPayload)
+  }
 
   const defaultHandleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value, files } = e.target
     setFormData((prev) => ({
       ...prev,
       [name]: files ? files : value,
-    }));
+    }))
   }
-  
 
   return (
     <CenteredModal
       visible={visible}
       onClose={onClose}
       title={titleMap[mode]}
-      onSave={handleSubmit}
+      onSave={() => {
+        if (customHandleSubmit) {
+          customHandleSubmit(formData)
+        } else {
+          defaultHandleSubmit()
+        }
+      }}
       loading={submitting || loading}
       saveButtonText={isDelete ? 'Hapus' : isReset ? 'Reset' : undefined}
       saveButtonColor={isDelete ? 'danger' : isReset ? 'warning' : undefined}

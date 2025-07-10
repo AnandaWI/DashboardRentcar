@@ -34,9 +34,10 @@ const ServiceCrudModal = (props) => {
   }, [endpoint, id, mode, onError, Toast])
 
   const handleSubmit = async (formData) => {
+    console.log('SUBMITTING:', formData)
     setSubmitting(true)
 
-    if (!formData.name || !formData.description) {
+    if (!formData['data.name'] || !formData['data.description']) {
       Toast.error('Name dan Description wajib diisi.')
       setSubmitting(false)
       return
@@ -73,8 +74,8 @@ const ServiceCrudModal = (props) => {
       }
 
       const payload = {
-        name: formData.name,
-        description: formData.description,
+        name: formData['data.name'],
+        description: formData['data.description'],
         img_url: file_img_url,
       }
 
