@@ -156,6 +156,14 @@ const CrudModal = ({
     return result
   }
 
+  const defaultHandleChange = (e) => {
+    const { name, value, files } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: files ? files : value,
+    }))
+  }
+
   const handleSubmit = async () => {
     // Handle file upload and replace file on flatFormData with uploaded URL
     for (const field of fields) {
@@ -178,14 +186,6 @@ const CrudModal = ({
 
     // Send nestedPayload to API
     await axiosInstance.post(endpoint, nestedPayload)
-  }
-
-  const defaultHandleChange = (e) => {
-    const { name, value, files } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: files ? files : value,
-    }))
   }
 
   return (

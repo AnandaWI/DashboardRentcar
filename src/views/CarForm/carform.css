@@ -1,0 +1,44 @@
+
+
+.img-placeholder {
+  background-color: #f0f0f0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #999;
+  font-weight: 600;
+}
+
+.img-placeholder-lg {
+  height: 320px; /* Besar untuk gambar utama */
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.img-row {
+  display: flex;
+  gap: 12px;
+}
+
+.img-placeholder-sm {
+  flex: 1; /* Dua gambar kecil berbagi ruang seimbang */
+  height: 160px; /* Tinggi setengah dari besar */
+}
+
+.car-images {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.features li {
+  margin-bottom: 8px;
+}
+
+.features i {
+  width: 16px;
+}

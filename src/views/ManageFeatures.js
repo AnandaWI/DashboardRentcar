@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { CButton, CCard, CCardBody, CModal, CModalBody, CModalFooter } from '@coreui/react'
 import { PaginatedTable } from '../components'
-import CrudModal from '../components/modals/CrudModal'
-import EditButton from '../components/buttons/EditButton'
+import FeaturesCrudModal from '../components/modals/FeaturesCrudModal'
 import DeleteButton from '../components/buttons/DeleteButton'
 import { useToast } from '../components/ToastManager'
 import axiosInstance from '../core/axiosInstance'
-import DriverCrudModal from '../components/modals/DriverCrudModal'
+import EditButton from '../components/buttons/EditButton'
 
-const ManageDriver = () => {
+const ManageFeatures = () => {
+
   const [modalVisible, setModalVisible] = useState(false)
-  const [modalMode, setModalMode] = useState('store') // 'store', 'edit', 'delete'
+  const [modalMode, setModalMode] = useState('store') // 'store' | 'edit'
   const [selectedId, setSelectedId] = useState(null)
   const [reload, setReload] = useState(false)
 
@@ -45,19 +45,24 @@ const ManageDriver = () => {
 
   const handleDeleteConfirm = async () => {
     try {
-      await axiosInstance.delete(`/api/driver/${deleteId}`)
-      Toast.success('Driver berhasil dihapus')
+      await axiosInstance.delete(`/api/features/${deleteId}`)
+      Toast.success('Feature berhasil dihapus')
       setReload((prev) => !prev)
     } catch (err) {
       console.error(err)
-      Toast.error('Gagal menghapus driver')
+      Toast.error('Gagal menghapus feature')
     } finally {
       setDeleteModalVisible(false)
       setDeleteId(null)
     }
   }
 
-  const handleSuccess = (message) => {
+  const handleSuccess = () => {
+    const message =
+      modalMode === 'edit'
+        ? 'Feature berhasil diupdate'
+        : 'Feature berhasil ditambahkan'
+
     setModalVisible(false)
     setSelectedId(null)
     Toast.success(message)
@@ -70,20 +75,20 @@ const ManageDriver = () => {
 
   const columns = [
     { key: 'name', label: 'Nama' },
-    { key: 'pengalaman', label: 'Pengalaman (Tahun)' },
-    { key: 'tgl_lahir', label: 'Tanggal Lahir' },
-    { 
-      key: 'img_url', 
+    { key: 'description', label: 'Deskripsi' },
+    {
+      key: 'img_url',
       label: 'Foto',
-      render: (item) => 
+      render: (item) =>
         item.img_url ? (
           <div className="d-flex gap-2">
             <CButton
-              color="primary"
-              onClick={() => openPhotoModal(item.img_url)}
-            >
-              Lihat Foto
-            </CButton>
+                key={item.id}
+                color="primary"
+                onClick={() => openPhotoModal(item.img_url)}
+              >
+                Lihat Foto
+              </CButton>
           </div>
         ) : (
           '-'
@@ -94,20 +99,20 @@ const ManageDriver = () => {
       label: 'Aksi',
       render: (item) => (
         <div className="d-flex align-items-center gap-2">
-          <EditButton onClick={() => openModal('edit', item.id)} />
           <DeleteButton onClick={() => openDeleteModal(item.id)} />
+        <EditButton onClick={() => openModal('edit', item.id)} />
         </div>
       ),
     },
   ]
 
-  const endpoint = '/api/driver'
-  const section = 'Driver'
+  const endpoint = '/api/features'
+  const section = 'Features'
+
   const fields = [
-    { name: 'data.name', label: 'Nama Driver', type: 'text' },
-    { name: 'data.pengalaman', label: 'Pengalaman (Tahun)', type: 'number', min: 0 },
-    { name: 'data.tgl_lahir', label: 'Tanggal Lahir', type: 'date' },
-    { name: 'img_url', label: 'Foto', type: 'file', location: 'drivers' }
+    { name: 'data.name', label: 'Nama', type: 'text', required: true },
+    { name: 'data.description', label: 'Deskripsi', type: 'textarea', required: true },
+    { name: 'file_img_url1', label: 'Gambar 1', type: 'file', accept: 'image/*', required: true },
   ]
 
   return (
@@ -115,9 +120,9 @@ const ManageDriver = () => {
       <CCard className="mb-4 p-4">
         <CCardBody className="d-flex flex-column gap-4">
           <div className="d-flex justify-content-between align-items-center">
-            <h4>Manage Driver</h4>
-            <CButton color="primary" className="p-2 px-3 fw-medium" onClick={() => openModal('store')}>
-              Tambah Driver
+            <h4>Manage Features</h4>
+            <CButton color="primary" onClick={() => openModal('store')}>
+              Tambah Feature
             </CButton>
           </div>
 
@@ -133,7 +138,7 @@ const ManageDriver = () => {
       </CModal>
 
       {/* Modal CRUD */}
-      <DriverCrudModal
+      <FeaturesCrudModal
         visible={modalVisible}
         onClose={() => {
           setModalVisible(false)
@@ -147,19 +152,13 @@ const ManageDriver = () => {
           store: `Tambah ${section}`,
           edit: `Edit ${section}`,
         }}
-        onSuccess={() => {
-          const message =
-            modalMode === 'edit'
-              ? `${section} berhasil diupdate`
-              : `${section} berhasil ditambahkan`
-          handleSuccess(message)
-        }}
+        onSuccess={handleSuccess}
         onError={handleError}
       />
 
       {/* Modal Delete */}
       <CModal visible={deleteModalVisible} onClose={() => setDeleteModalVisible(false)}>
-        <CModalBody>Apakah Anda yakin ingin menghapus driver ini?</CModalBody>
+        <CModalBody>Apakah Anda yakin ingin menghapus feature ini?</CModalBody>
         <CModalFooter>
           <CButton color="secondary" onClick={() => setDeleteModalVisible(false)}>
             Batal
@@ -173,4 +172,4 @@ const ManageDriver = () => {
   )
 }
 
-export default ManageDriver
+export default ManageFeatures

@@ -47,6 +47,12 @@ const getNav = (roles = []) => {
     },
     {
       component: CNavItem,
+      name: 'Manage Features',
+      to: '/manage-features',
+      icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
+    },
+    {
+      component: CNavItem,
       name: 'Manage Driver',
       to: '/manage-driver',
       icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,

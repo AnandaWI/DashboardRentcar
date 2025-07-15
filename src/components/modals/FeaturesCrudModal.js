@@ -1,0 +1,116 @@
+import React, { useState, useEffect } from 'react'
+import CrudModal from './CrudModal'
+import { useToast } from '../ToastManager'
+import axiosInstance from '../../core/axiosInstance'
+import supabaseFeatures from '../../core/supabaseFeatures'
+
+
+const FeaturesCrudModal = (props) => {
+  const { endpoint, mode, id, onSuccess, onError, ...rest } = props
+  const Toast = useToast()
+  const [submitting, setSubmitting] = useState(false)
+  const [initialData, setInitialData] = useState(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (mode === 'edit' && id) {
+        try {
+          const response = await axiosInstance.get(`${endpoint}/${id}`)
+          setInitialData({
+            name: response.data.name,
+            description: response.data.description,
+            file_img_url1: null,
+            existingImages: response.data.img_url || [],
+          })
+        } catch (error) {
+          const msg = error?.message || 'Gagal memuat data'
+          Toast.error(msg)
+          onError?.(msg)
+        }
+      }
+    }
+    fetchData()
+  }, [endpoint, id, mode, onError, Toast])
+
+  const handleSubmit = async (formData) => {
+    console.log('SUBMITTING:', formData)
+    setSubmitting(true)
+
+    if (!formData['data.name'] || !formData['data.description']) {
+      Toast.error('Name dan Description wajib diisi.')
+      setSubmitting(false)
+      return
+    }
+
+    let file_img_url = []
+
+    try {
+      if (formData.file_img_url1 instanceof File) {
+        const path1 = await supabaseFeatures.upload('features', formData.file_img_url1)
+        file_img_url.push(supabaseFeatures.getPublicUrl(path1))
+      } else if (initialData?.existingImages[0]) {
+        file_img_url.push(initialData.existingImages[0])
+      }
+
+      if (file_img_url.length !== 1) {
+        Toast.error('Gambar wajib ada.')
+        setSubmitting(false)
+        return
+      }
+
+      const payload = {
+        name: formData['data.name'],
+        description: formData['data.description'],
+        img_url: file_img_url[0],
+      }
+
+      if (mode === 'edit') {
+        await axiosInstance.put(`${endpoint}/${id}`, payload)
+      } else {
+        await axiosInstance.post(endpoint, payload)
+      }
+
+      setInitialData(null)
+      onSuccess?.()
+      props.onClose()
+    } catch (err) {
+      console.error('Submit error:', err)
+      const message = err?.message || 'Terjadi kesalahan saat submit'
+      Toast.error(message)
+      setInitialData(null)
+      onError?.(message)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const customHandleChange = (e, setFormData) => {
+    const { name, type, value, files } = e.target
+
+    if (type === 'file') {
+      const file = files && files[0]
+      if (file) {
+        setFormData((prev) => ({ ...prev, [name]: file }))
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }))
+    }
+  }
+
+  return (
+    <CrudModal
+      {...rest}
+      endpoint={endpoint}
+      mode={mode}
+      id={id}
+      initialData={initialData}
+      onSuccess={onSuccess}
+      onError={onError}
+      isSubmit={submitting}
+      customHandleSubmit={handleSubmit}
+      customHandleChange={customHandleChange}
+    />
+  )
+}
+
+export default FeaturesCrudModal

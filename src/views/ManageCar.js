@@ -5,7 +5,8 @@ import CrudModal from '../components/modals/CrudModal'
 import EditButton from '../components/buttons/EditButton'
 import DeleteButton from '../components/buttons/DeleteButton'
 import { useToast } from '../components/ToastManager'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import ShowButton from '../components/buttons/ShowButton'
 
 const ManageCar = () => {
   const [modalVisible, setModalVisible] = useState(false)
@@ -20,8 +21,12 @@ const ManageCar = () => {
     setModalVisible(true)
   }
 
-  const handleAdd = () => openModal('store')
-  const handleEdit = (id) => openModal('edit', id)
+  const handleAdd = () => {
+    window.location.href = '/#/manage-car/car-form'
+  }
+  const handleEdit = (id) => {
+    window.location.href = `/#/manage-car/car-form/${id}`
+  }
   const handleDelete = (id) => openModal('delete', id)
 
   const location = useLocation()
@@ -52,10 +57,10 @@ const ManageCar = () => {
   }
   const columns = [
     { key: 'car_name', label: 'Merk Mobil' },
-    { 
-      key: 'category', 
-      label: 'Kategori', 
-      render: (item) => item.category?.name || '-'  // akses nama kategori dengan aman
+    {
+      key: 'category',
+      label: 'Kategori',
+      render: (item) => item.category?.name || '-', // akses nama kategori dengan aman
     },
     { key: 'capacity', label: 'Kapasitas' },
     { key: 'rent_price', label: 'Harga' },
@@ -64,7 +69,7 @@ const ManageCar = () => {
       label: 'Aksi',
       render: (item) => (
         <div className="d-flex align-items-center gap-2">
-          <EditButton onClick={() => handleEdit(item.id)} />
+          <ShowButton onClick={() => handleEdit(item.id)} />
           <DeleteButton onClick={() => handleDelete(item.id)} />
         </div>
       ),
@@ -75,14 +80,18 @@ const ManageCar = () => {
   const section = 'Tag'
   const fields = [
     { name: 'data.car_name', label: 'Merk Mobil', type: 'text' },
-    { name: 'data.category_id', label: 'Kategori', type: 'select', options: [
+    {
+      name: 'data.category_id',
+      label: 'Kategori',
+      type: 'select',
+      options: [
         { value: '1', label: 'VIP' },
-        { value: '2', label: 'REGULER' }
-      ]
+        { value: '2', label: 'REGULER' },
+      ],
     },
     { name: 'data.capacity', label: 'Kapasitas', type: 'number' },
-    { name: 'data.rent_price', label: 'Harga', type: 'number' }
-  ];
+    { name: 'data.rent_price', label: 'Harga', type: 'number' },
+  ]
 
   return (
     <>
@@ -92,7 +101,7 @@ const ManageCar = () => {
             <h4>Manage Mobil</h4>
 
             <div className="d-flex align-items-center gap-2">
-            <select
+              <select
                 id="filterStatus"
                 className="form-select p-2 px-3"
                 style={{ width: '200px' }}
@@ -103,9 +112,9 @@ const ManageCar = () => {
                 <option value="1">VIP</option>
                 <option value="2">Reguler</option>
               </select>
-            <CButton color="primary" className="p-2 px-3 fw-medium" onClick={handleAdd}>
-              Tambah Mobil
-            </CButton>
+              <CButton color="primary" className="p-2 px-3 fw-medium" onClick={handleAdd}>
+                Tambah Mobil
+              </CButton>
             </div>
           </div>
 
