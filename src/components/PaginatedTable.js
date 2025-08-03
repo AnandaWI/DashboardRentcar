@@ -19,6 +19,9 @@ const PaginatedTable = ({ columns, endpoint, perPage = 10, showSearch = true, re
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState(getQueryParam('q') || '')
 
+  const getNestedValue = (obj, path) =>
+    path.split('.').reduce((o, k) => (o && o[k] !== undefined ? o[k] : ''), obj)
+
   const fetchData = async (page) => {
     setLoading(true)
     setError(null)
@@ -29,7 +32,9 @@ const PaginatedTable = ({ columns, endpoint, perPage = 10, showSearch = true, re
           q: getQueryParam('q') || '',
           ...(getQueryParam('is_used') !== null && { is_used: getQueryParam('is_used') }),
           ...(getQueryParam('order') !== null && { order: getQueryParam('order') }),
-          ...(getQueryParam('category_id') !== null && { category_id: getQueryParam('category_id') }),
+          ...(getQueryParam('category_id') !== null && {
+            category_id: getQueryParam('category_id'),
+          }),
         },
       })
 
@@ -143,7 +148,7 @@ const PaginatedTable = ({ columns, endpoint, perPage = 10, showSearch = true, re
                   <tr key={rowIndex}>
                     {extendedColumns.map((col, colIndex) => (
                       <td key={colIndex}>
-                        {col.render ? col.render(row, rowIndex) : row[col.key]}
+                        {col.render ? col.render(row, rowIndex) : getNestedValue(row, col.key)}
                       </td>
                     ))}
                   </tr>

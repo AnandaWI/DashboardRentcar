@@ -29,12 +29,12 @@ const AppSidebar = () => {
     >
       <CSidebarHeader className="border-bottom d-flex justify-content-center">
         <CSidebarBrand style={{ textDecoration: 'none', fontWeight: 'bold' }} to="/">
-          {/* <img
-            src="../../public/logo-monochrome.svg"
+          <img
+            src="../../public/AEM.png"
             alt="Logo"
-            style={{ height: '30px', marginRight: '8px' }}
-          /> */}
-          <h5 style={{ display: 'inline', margin: 0 }}>AEM RentCar</h5>
+            style={{ height: '50px', marginRight: '8px' }}
+          />
+          <h5 style={{ display: 'inline', margin: 0, color: 'goldenrod' }}>AEM RentCar</h5>
         </CSidebarBrand>
       </CSidebarHeader>
 

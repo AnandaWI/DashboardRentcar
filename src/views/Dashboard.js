@@ -9,27 +9,20 @@ import formatTimeAgo from '../core/formatTimeAgo'
 
 const Dashboard = () => {
   const Toast = useToast()
-  const [totalPost, setTotalPost] = useState(0)
-  const [totalCategory, setTotalCategory] = useState(0)
-  const [totalTag, setTotalTag] = useState(0)
-  const [totalUser, setTotalUser] = useState(0)
-  const [logs, setLogs] = useState([])
+
+  const [dashboardData, setDashboardData] = useState({
+    totalDriver: 0,
+    totalCar: 0,
+    totalDestination: 0,
+    totalTransaction: 0,
+    logTransaction: [],
+  })
 
   const [modalVisible, setModalVisible] = useState(false)
   const [modalMode, setModalMode] = useState('store')
   const [selectedId, setSelectedId] = useState(null)
   const [currentSection, setCurrentSection] = useState(null)
 
-  const crudConfigs = {
-    Category: {
-      endpoint: '/dashboard/manage-category',
-      fields: [{ name: 'name', label: 'Nama Category', type: 'text' }],
-    },
-    Tag: {
-      endpoint: '/dashboard/manage-tag',
-      fields: [{ name: 'name', label: 'Nama Tag', type: 'text' }],
-    },
-  }
   const openModal = (section, mode = 'store', id = null) => {
     setCurrentSection(section)
     setModalMode(mode)
@@ -40,13 +33,15 @@ const Dashboard = () => {
   useEffect(() => {
     const getData = async () => {
       try {
-        const response = await axiosInstance.get('/dashboard/manage-dashboard')
-        const data = response.data
-        setTotalPost(data.total_posts || 0)
-        setTotalCategory(data.total_categories || 0)
-        setTotalTag(data.total_tags || 0)
-        setTotalUser(data.total_users || 0)
-        setLogs(data.total_logs || [])
+        const response = await axiosInstance.get('/api/dashboard')
+        const data = response.data.data
+        setDashboardData({
+          totalDriver: data.total_driver || 0,
+          totalCar: data.total_car || 0,
+          totalDestination: data.total_destination || 0,
+          totalTransaction: data.total_transaction || 0,
+          logTransaction: data.log_transaction || [],
+        })
       } catch (error) {
         console.error('Failed to fetch dashboard statistics', error)
         Toast.error(error)
@@ -59,18 +54,18 @@ const Dashboard = () => {
   return (
     <div className="p-4">
       <CRow className="mb-4">
-        <StatCard icon={cilNotes} title="Total Post" value={totalPost} />
-        <StatCard icon={cilList} title="Total Category" value={totalCategory} />
-        <StatCard icon={cilTag} title="Total Tag" value={totalTag} />
-        <StatCard icon={cilUser} title="User Terdaftar" value={totalUser} />
+        <StatCard icon={cilNotes} title="Total Mobil" value={dashboardData.totalCar} />
+        <StatCard icon={cilList} title="Total Driver" value={dashboardData.totalDriver} />
+        <StatCard icon={cilTag} title="Total Destinasi" value={dashboardData.totalDestination} />
+        <StatCard icon={cilUser} title="Total Transaksi" value={dashboardData.totalTransaction} />
       </CRow>
 
       <CRow>
         <CCol md={6} className="d-flex">
           <CCard className="flex-fill">
             <CCardBody className="p-4">
-              <CCardTitle className="h5 mb-3">Recent Activity</CCardTitle>
-              <CListGroup flush>
+              <CCardTitle className="h5 mb-3">Transaksi Terakhir</CCardTitle>
+              {/* <CListGroup flush>
                 {logs.length === 0 ? (
                   <CListGroupItem>No recent activity</CListGroupItem>
                 ) : (
@@ -83,46 +78,13 @@ const Dashboard = () => {
                     </CListGroupItem>
                   ))
                 )}
-              </CListGroup>
-            </CCardBody>
-          </CCard>
-        </CCol>
-
-        <CCol md={6} className="d-flex">
-          <CCard className="flex-fill">
-            <CCardBody className="p-4">
-              <CCardTitle className="h5 mb-4">Quick Links</CCardTitle>
-              <CRow className="g-3">
-                <CCol xs={12}>
-                  <QuickLink
-                    icon={cilNotes}
-                    title="Tulis Postingan"
-                    desc="Buat dan publikasikan artikel baru"
-                  />
-                </CCol>
-                <CCol xs={12}>
-                  <QuickLink
-                    icon={cilList}
-                    title="Tambah Kategori"
-                    desc="Buat kategori untuk mengelompokkan konten"
-                    onClick={() => openModal('Category', 'store')}
-                  />
-                </CCol>
-                <CCol xs={12}>
-                  <QuickLink
-                    icon={cilTag}
-                    title="Tambah Tag"
-                    desc="Buat tag untuk mempermudah pencarian"
-                    onClick={() => openModal('Tag', 'store')}
-                  />
-                </CCol>
-              </CRow>
+              </CListGroup> */}
             </CCardBody>
           </CCard>
         </CCol>
       </CRow>
 
-      <CrudModal
+      {/* <CrudModal
         visible={modalVisible}
         onClose={() => {
           setModalVisible(false)
@@ -151,7 +113,7 @@ const Dashboard = () => {
           setCurrentSection(null)
         }}
         onError={(msg) => Toast.error(msg)}
-      />
+      /> */}
     </div>
   )
 }

@@ -138,7 +138,7 @@ const CarForm = () => {
                     style={{ backgroundImage: `url(${imagePreviews[0]})` }}
                     onClick={() => handlePlaceholderClick(0)}
                   >
-                    {!imagePreviews[1] && <span>img_url[0]</span>}
+                    {!imagePreviews[1] && <span>Gambar 1</span>}
                   </div>
                   <CFormInput
                     type="file"
@@ -155,7 +155,7 @@ const CarForm = () => {
                     style={{ backgroundImage: `url(${imagePreviews[1]})` }}
                     onClick={() => handlePlaceholderClick(1)}
                   >
-                    {!imagePreviews[1] && <span>img_url[1]</span>}
+                    {!imagePreviews[1] && <span>Gambar 2</span>}
                   </div>
                   <CFormInput
                     type="file"
@@ -171,7 +171,7 @@ const CarForm = () => {
                     style={{ backgroundImage: `url(${imagePreviews[2]})` }}
                     onClick={() => handlePlaceholderClick(2)}
                   >
-                    {!imagePreviews[2] && <span>img_url[2]</span>}
+                    {!imagePreviews[2] && <span>Gambar 3</span>}
                   </div>
                   <CFormInput
                     type="file"
@@ -189,7 +189,7 @@ const CarForm = () => {
               <CFormInput
                 type="text"
                 name="car_name"
-                placeholder="car_name"
+                placeholder="Merk Mobil"
                 className="p-3 mb-3 form-control-custom"
                 value={formData.car_name}
                 onChange={handleFormChange}
@@ -201,18 +201,18 @@ const CarForm = () => {
                 onChange={handleFormChange}
                 options={[
                   {
-                    label: 'category_id (select option regular = 1, vip = 2)',
+                    label: 'Kategori',
                     value: '',
                     disabled: true,
                   },
-                  { label: 'Regular', value: '1' },
-                  { label: 'VIP', value: '2' },
+                  { label: 'VIP', value: '1' },
+                  { label: 'Regular', value: '2' },
                 ]}
               />
               <CFormInput
                 type="number"
                 name="capacity"
-                placeholder="capacity (number)"
+                placeholder="Kapasitas"
                 className="p-3 mb-3 form-control-custom"
                 value={formData.capacity}
                 onChange={handleFormChange}
@@ -220,7 +220,7 @@ const CarForm = () => {
               <CFormInput
                 type="text"
                 name="rent_price"
-                placeholder="rent_price"
+                placeholder="Harga"
                 className="p-3 mb-3 form-control-custom"
                 value={formData.rent_price}
                 onChange={handleFormChange}
@@ -228,7 +228,7 @@ const CarForm = () => {
               <CFormTextarea
                 name="description"
                 rows={4}
-                placeholder="description"
+                placeholder="Deskripsi"
                 className="p-3 mb-3 form-control-custom"
                 value={formData.description}
                 onChange={handleFormChange}
@@ -239,7 +239,7 @@ const CarForm = () => {
                 <CInputGroup className="mb-3" key={index}>
                   <CFormInput
                     className="p-3 form-control-custom"
-                    placeholder={feature[`${index}`]}
+                    placeholder="Fasilitas"
                     value={feature}
                     onChange={(e) => handleFeatureChange(index, e.target.value)}
                   />
@@ -254,7 +254,7 @@ const CarForm = () => {
 
               <div className="d-grid mt-4">
                 <CButton type="submit" className="btn-primary p-3">
-                  CREATE
+                  Tambah
                 </CButton>
               </div>
             </CCol>

@@ -3,11 +3,11 @@ import { CSpinner } from '@coreui/react'
 import axiosInstance from '../../core/axiosInstance'
 import CenteredModal from '../CenteredModal'
 import supabaseService from '../../core/supabaseService'
+import CarCategorySelect from '../select/CarCategorySelect'
 
 const getNestedValue = (obj, path) => {
   return path.split('.').reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : ''), obj)
 }
-
 const CrudModal = ({
   visible,
   onClose,
@@ -47,14 +47,31 @@ const CrudModal = ({
         .get(`${endpoint}/${id}`)
         .then((res) => {
           const data = {}
+          // fields.forEach((field) => {
+          //   data[field.name] = getNestedValue(res.data, field.name)
+          // })
           fields.forEach((field) => {
-            data[field.name] = getNestedValue(res.data, field.name)
+            const rawValue = getNestedValue(res.data, field.name)
+
+            // Cek jika field type custom dan komponen CarCategorySelect
+            if (
+              field.type === 'custom' &&
+              field.component &&
+              field.component.name === 'CarCategorySelect'
+            ) {
+              console.log('asdasd')
+              const carType = res.data.data.car_type
+              data[field.name] = carType ? { value: carType.id, label: carType.car_name } : null
+            } else {
+              data[field.name] = rawValue
+            }
           })
+
           setFormData(data)
         })
         .catch((err) => {
           console.error('Failed to fetch data:', err)
-          onError?.('Gagal memuat data. Silakan coba lagi.')
+          onError?.('Gagal memuat data. Silakan coba lagi.' + err)
         })
         .finally(() => setLoading(false))
     } else {
@@ -75,7 +92,15 @@ const CrudModal = ({
     Object.keys(flatObj).forEach((path) => {
       const keyParts = path.split('.')
       const finalKey = keyParts[keyParts.length - 1]
-      payload[finalKey] = flatObj[path]
+
+      let val = flatObj[path]
+
+      // Jika val object (react-select) ambil val.value
+      if (val && typeof val === 'object' && val.value !== undefined) {
+        val = val.value
+      }
+
+      payload[finalKey] = val
     })
     return payload
   }
@@ -231,52 +256,73 @@ const CrudModal = ({
         </div>
       ) : (
         <div>
-          {fields.map(({ name, label, type = 'text', placeholder, options, accept }) => (
-            <div className="mb-3" key={name}>
-              <label htmlFor={name} className="form-label">
-                {label}
-              </label>
-              {type === 'select' ? (
-                <select
-                  name={name}
-                  id={name}
-                  value={formData[name] ?? ''}
-                  className="form-select"
-                  onChange={(e) => {
-                    if (customHandleChange) {
-                      customHandleChange(e, setFormData)
-                    } else {
-                      defaultHandleChange(e)
-                    }
-                  }}
-                >
-                  <option value="">Pilih {label}</option>
-                  {options?.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  type={type}
-                  name={name}
-                  id={name}
-                  value={type === 'file' ? undefined : (formData[name] ?? '')}
-                  placeholder={placeholder || `Masukkan ${label.toLowerCase()}`}
-                  className="form-control"
-                  onChange={(e) => {
-                    if (customHandleChange) {
-                      customHandleChange(e, setFormData)
-                    } else {
-                      defaultHandleChange(e)
-                    }
-                  }}
-                  {...(type === 'file' ? { accept } : {})}
-                />
-              )}
-            </div>
-          ))}
+          {fields.map(
+            ({
+              name,
+              label,
+              type = 'text',
+              placeholder,
+              options,
+              accept,
+              component: Component,
+            }) => (
+              <div className="mb-3" key={name}>
+                <label htmlFor={name} className="form-label">
+                  {label}
+                </label>
+                {type === 'select' ? (
+                  <select
+                    name={name}
+                    id={name}
+                    value={formData[name] ?? ''}
+                    className="form-select"
+                    onChange={(e) => {
+                      if (customHandleChange) {
+                        customHandleChange(e, setFormData)
+                      } else {
+                        defaultHandleChange(e)
+                      }
+                    }}
+                  >
+                    <option value="">Pilih {label}</option>
+                    {options?.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : type === 'custom' && Component ? (
+                  <Component
+                    value={formData[name] ?? null}
+                    onChange={(selected) => {
+                      // selected bisa {value, label} dari react-select
+                      setFormData((prev) => ({
+                        ...prev,
+                        [name]: selected ?? null,
+                      }))
+                    }}
+                  />
+                ) : (
+                  <input
+                    type={type}
+                    name={name}
+                    id={name}
+                    value={type === 'file' ? undefined : (formData[name] ?? '')}
+                    placeholder={placeholder || `Masukkan ${label.toLowerCase()}`}
+                    className="form-control"
+                    onChange={(e) => {
+                      if (customHandleChange) {
+                        customHandleChange(e, setFormData)
+                      } else {
+                        defaultHandleChange(e)
+                      }
+                    }}
+                    {...(type === 'file' ? { accept } : {})}
+                  />
+                )}
+              </div>
+            ),
+          )}
         </div>
       )}
     </CenteredModal>

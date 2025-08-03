@@ -37,6 +37,7 @@ const Login = () => {
       localStorage.setItem('token', response.data.access_token)
       localStorage.setItem('user', JSON.stringify(response.data.user))
       const roleNames = response.data.user.roles.map((role) => role.name)
+
       localStorage.setItem('roles', JSON.stringify(roleNames))
 
       navigate('/dashboard')
@@ -68,16 +69,16 @@ const Login = () => {
                   {/* Deskripsi Project + Logo */}
                   <CCard className="p-4 text-center ">
                     <CCardBody>
-                      <img
+                      {/* <img
                         src="/logo.svg" // Path lebih baik dimulai dari root public
-                        alt="Sightway Logo"
+                        alt="AEM RentCar Logo"
                         style={{ height: '100px', marginBottom: '1rem' }}
-                      />
-                      <h4 className="fw-bold text-body">Sightway</h4>
+                      /> */}
+                      <h4 className="fw-bold text-body">AEM RentCar</h4>
                       <CCardText className="text-body-secondary" style={{ fontSize: '0.9rem' }}>
-                        Sightway adalah sistem monitoring inovatif untuk membantu dan meningkatkan
-                        kemandirian penyandang tunanetra. Mengintegrasikan IoT, AI, Aplikasi Mobile,
-                        dan Web untuk memberikan rasa aman, kebebasan, dan kemandirian.
+                        AEM RentCar adalah perusahaan sewa mobil premium dan ekonomi yang
+                        mengutamakan keamanan, kenyamanan, dan keselamatan penumpang dengan drver
+                        yang profesional dan berpengalaman.
                       </CCardText>
                     </CCardBody>
                   </CCard>
@@ -87,7 +88,9 @@ const Login = () => {
                     <CCardBody>
                       <CForm onSubmit={handleLogin}>
                         <h1>Login</h1>
-                        <p className="text-body-secondary">Login untuk masuk Dashboard Sightway</p>
+                        <p className="text-body-secondary">
+                          Login untuk masuk Dashboard AEM RentCar
+                        </p>
                         <CInputGroup className="mb-3">
                           <CInputGroupText>
                             <CIcon icon={cilUser} />

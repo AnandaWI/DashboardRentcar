@@ -31,9 +31,13 @@ const CarShow = () => {
     img_url: [],
   })
 
+  // State terpisah untuk features seperti di CarForm
+  const [features, setFeatures] = useState([''])
+
   // Ref untuk file input
   const fileInputRefs = [useRef(null), useRef(null), useRef(null)]
   const [imagePreviews, setImagePreviews] = useState([null, null, null])
+  const [originalImageUrls, setOriginalImageUrls] = useState([null, null, null])
 
   useEffect(() => {
     fetchCar()
@@ -43,18 +47,39 @@ const CarShow = () => {
     try {
       const response = await axiosInstance.get(`/api/car-types/${id}`)
       const carData = response.data.data
+
       setCar(carData)
-      setFormData({
-        car_name: carData.car_name,
-        category_id: carData.category_id,
-        capacity: carData.capacity,
-        rent_price: carData.rent_price,
-        description: carData.description,
-        feature: carData.features.map((f) => f.feature),
-        img_url: carData.images.map((img) => img.img_url),
-      })
-      // Set image previews
-      setImagePreviews(carData.images.map((img) => img.img_url))
+
+      // Extract features dari response
+      const extractedFeatures = carData.features?.map((f) => f.feature) || []
+
+      // Pastikan minimal ada satu field kosong untuk editing
+      const featuresForState = extractedFeatures.length > 0 ? extractedFeatures : ['']
+
+      const newFormData = {
+        car_name: carData.car_name || '',
+        category_id: carData.category_id || '',
+        capacity: carData.capacity || '',
+        rent_price: carData.rent_price || '',
+        description: carData.description || '',
+        feature: extractedFeatures,
+        img_url: carData.images?.map((img) => img.img_url) || [],
+      }
+
+      setFormData(newFormData)
+      setFeatures(featuresForState)
+
+      // Set image previews - pastikan ada 3 slot
+      const imageUrls = carData.images?.map((img) => img.img_url) || []
+
+      const paddedImageUrls = [...imageUrls]
+      while (paddedImageUrls.length < 3) {
+        paddedImageUrls.push(null)
+      }
+      const finalImageUrls = paddedImageUrls.slice(0, 3)
+
+      setImagePreviews(finalImageUrls)
+      setOriginalImageUrls(finalImageUrls)
     } catch (error) {
       console.error('Error fetching car:', error)
     } finally {
@@ -64,28 +89,74 @@ const CarShow = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    setFormData({
+
+    const newFormData = {
       ...formData,
       [name]: value,
+    }
+    setFormData(newFormData)
+  }
+
+  // Handler untuk input 'feature' - menggunakan state features terpisah
+  const handleFeatureChange = (index, value) => {
+    const newFeatures = [...features]
+    newFeatures[index] = value
+
+    setFeatures(newFeatures)
+
+    // Sinkronisasi dengan formData
+    const filteredFeatures = newFeatures.filter((f) => f.trim() !== '')
+
+    setFormData({
+      ...formData,
+      feature: filteredFeatures,
     })
   }
 
-  const handleFeatureChange = (index, value) => {
-    const newFeatures = [...formData.feature]
-    newFeatures[index] = value
-    setFormData({
-      ...formData,
-      feature: newFeatures,
-    })
+  // Handler untuk menambah field 'feature' baru
+  const addFeatureField = () => {
+    const newFeatures = [...features, '']
+    setFeatures(newFeatures)
+  }
+
+  // Handler untuk menghapus field 'feature'
+  const removeFeatureField = (index) => {
+    if (features.length > 1) {
+      const newFeatures = features.filter((_, i) => i !== index)
+
+      setFeatures(newFeatures)
+
+      // Sinkronisasi dengan formData
+      const filteredFeatures = newFeatures.filter((f) => f.trim() !== '')
+
+      setFormData({
+        ...formData,
+        feature: filteredFeatures,
+      })
+    }
   }
 
   // Handler untuk perubahan file gambar
   const handleImageChange = (e, index) => {
     const file = e.target.files[0]
+
     if (file) {
       const newPreviews = [...imagePreviews]
-      newPreviews[index] = URL.createObjectURL(file)
+      const blobUrl = URL.createObjectURL(file)
+      newPreviews[index] = blobUrl
       setImagePreviews(newPreviews)
+    }
+  }
+
+  // Handler untuk menghapus gambar
+  const removeImage = (index) => {
+    const newPreviews = [...imagePreviews]
+    newPreviews[index] = null
+    setImagePreviews(newPreviews)
+
+    // Reset file input
+    if (fileInputRefs[index].current) {
+      fileInputRefs[index].current.value = ''
     }
   }
 
@@ -98,37 +169,95 @@ const CarShow = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    try {
-      const imgUrlArray = [...formData.img_url] // Salin URL gambar yang ada
 
-      // Loop untuk upload gambar baru
-      for (let i = 0; i < fileInputRefs.length; i++) {
+    try {
+      // Prepare image URLs array
+      const imgUrlArray = []
+
+      // Process each image slot
+      for (let i = 0; i < 3; i++) {
         const fileInput = fileInputRefs[i].current
+        const currentPreview = imagePreviews[i]
+
+        // Check if there's a new file uploaded
         if (fileInput && fileInput.files[0]) {
-          const uploadedPath = await supabaseService.upload('cars', fileInput.files[0])
-          const publicUrl = supabaseService.getPublicUrl(uploadedPath)
-          imgUrlArray[i] = publicUrl // Update URL gambar jika ada file baru
+          try {
+            const uploadedPath = await supabaseService.upload('cars', fileInput.files[0])
+            const publicUrl = supabaseService.getPublicUrl(uploadedPath)
+            imgUrlArray.push(publicUrl)
+          } catch (uploadError) {
+            throw uploadError
+          }
+        }
+        // Check if there's an existing image (not removed)
+        else if (currentPreview && !currentPreview.startsWith('blob:')) {
+          imgUrlArray.push(currentPreview)
         }
       }
 
+      // Prepare final data
+      const finalFeatures = features.filter((f) => f.trim() !== '')
+
       const finalData = {
-        ...formData,
+        car_name: formData.car_name,
+        category_id: formData.category_id,
+        capacity: parseInt(formData.capacity) || 0,
+        rent_price: formData.rent_price,
+        description: formData.description,
+        feature: finalFeatures,
         img_url: imgUrlArray,
       }
 
-      await axiosInstance.put(`/api/car-types/${id}`, finalData)
+      const response = await axiosInstance.put(`/api/car-types/${id}`, finalData)
+
       setIsEditing(false)
-      fetchCar() // Refresh data after update
+      await fetchCar()
+
+      alert('Data mobil berhasil diupdate!')
     } catch (error) {
-      console.error('Error updating car:', error)
-      alert('Gagal update mobil. Lihat console log untuk detail.')
+      const errorMessage = error.response?.data?.message || error.message || 'Unknown error'
+      alert(`Gagal update mobil: ${errorMessage}`)
+    }
+  }
+
+  // Reset form saat cancel
+  const handleCancel = () => {
+    setIsEditing(false)
+
+    // Reset ke data asli dari car state
+    if (car) {
+      const extractedFeatures = car.features?.map((f) => f.feature) || []
+      const featuresForState = extractedFeatures.length > 0 ? extractedFeatures : ['']
+
+      const resetFormData = {
+        car_name: car.car_name || '',
+        category_id: car.category_id || '',
+        capacity: car.capacity || '',
+        rent_price: car.rent_price || '',
+        description: car.description || '',
+        feature: extractedFeatures,
+        img_url: car.images?.map((img) => img.img_url) || [],
+      }
+
+      setFormData(resetFormData)
+      setFeatures(featuresForState)
+
+      // Reset image previews ke original
+      setImagePreviews([...originalImageUrls])
+
+      // Reset file inputs
+      fileInputRefs.forEach((ref, index) => {
+        if (ref.current) {
+          ref.current.value = ''
+        }
+      })
     }
   }
 
   // Cleanup URL objects
   useEffect(() => {
     return () => {
-      imagePreviews.forEach((url) => {
+      imagePreviews.forEach((url, index) => {
         if (url && url.startsWith('blob:')) {
           URL.revokeObjectURL(url)
         }
@@ -154,13 +283,7 @@ const CarShow = () => {
             </CButton>
           ) : (
             <div className="d-flex gap-2">
-              <CButton
-                color="secondary"
-                onClick={() => {
-                  setIsEditing(false)
-                  setImagePreviews(formData.img_url) // Reset preview ke URL asli
-                }}
-              >
+              <CButton color="secondary" onClick={handleCancel}>
                 Cancel
               </CButton>
               <CButton color="primary" onClick={handleSubmit}>
@@ -176,22 +299,38 @@ const CarShow = () => {
               <CRow className="g-3">
                 {imagePreviews.map((url, index) => (
                   <CCol xs={12} key={index}>
-                    <div
-                      className="img-placeholder img-placeholder-sm"
-                      style={{ backgroundImage: `url(${url})` }}
-                      onClick={() => handlePlaceholderClick(index)}
-                    >
-                      <span>img_url[{index}]</span>
+                    <div className="position-relative">
+                      <div
+                        className="img-placeholder img-placeholder-sm"
+                        style={{
+                          backgroundImage: url ? `url(${url})` : 'none',
+                          cursor: isEditing ? 'pointer' : 'default',
+                        }}
+                        onClick={() => handlePlaceholderClick(index)}
+                      >
+                        {!url && <span>Gambar {index + 1}</span>}
+                      </div>
+                      {isEditing && url && (
+                        <CButton
+                          color="danger"
+                          size="sm"
+                          className="position-absolute top-0 end-0 m-1"
+                          onClick={() => removeImage(index)}
+                          style={{ zIndex: 10 }}
+                        >
+                          ×
+                        </CButton>
+                      )}
+                      {isEditing && (
+                        <CFormInput
+                          type="file"
+                          className="d-none"
+                          ref={fileInputRefs[index]}
+                          accept="image/*"
+                          onChange={(e) => handleImageChange(e, index)}
+                        />
+                      )}
                     </div>
-                    {isEditing && (
-                      <CFormInput
-                        type="file"
-                        className="d-none"
-                        ref={fileInputRefs[index]}
-                        accept="image/*"
-                        onChange={(e) => handleImageChange(e, index)}
-                      />
-                    )}
                   </CCol>
                 ))}
               </CRow>
@@ -202,7 +341,7 @@ const CarShow = () => {
               <CFormInput
                 type="text"
                 name="car_name"
-                placeholder="car_name"
+                placeholder="Merk"
                 className="p-3 mb-3 form-control-custom"
                 value={formData.car_name}
                 onChange={handleInputChange}
@@ -215,14 +354,14 @@ const CarShow = () => {
                 onChange={handleInputChange}
                 disabled={!isEditing}
                 options={[
-                  { label: 'Regular', value: '1' },
-                  { label: 'VIP', value: '2' },
+                  { label: 'VIP', value: '1' },
+                  { label: 'Regular', value: '2' },
                 ]}
               />
               <CFormInput
                 type="number"
                 name="capacity"
-                placeholder="capacity (number)"
+                placeholder="Kapasitas"
                 className="p-3 mb-3 form-control-custom"
                 value={formData.capacity}
                 onChange={handleInputChange}
@@ -231,7 +370,7 @@ const CarShow = () => {
               <CFormInput
                 type="text"
                 name="rent_price"
-                placeholder="rent_price"
+                placeholder="Harga"
                 className="p-3 mb-3 form-control-custom"
                 value={formData.rent_price}
                 onChange={handleInputChange}
@@ -240,22 +379,48 @@ const CarShow = () => {
               <CFormTextarea
                 name="description"
                 rows={4}
-                placeholder="description"
+                placeholder="Deskripsi"
                 className="p-3 mb-3 form-control-custom"
                 value={formData.description}
                 onChange={handleInputChange}
                 readOnly={!isEditing}
               ></CFormTextarea>
 
-              {/* Bagian Feature */}
-              {formData.feature.map((feature, index) => (
+              {/* Bagian Feature Dinamis */}
+              {features.map((feature, index) => (
                 <CInputGroup className="mb-3" key={index}>
                   <CFormInput
                     className="p-3 form-control-custom"
+                    placeholder="Fasilitas"
                     value={feature}
                     onChange={(e) => handleFeatureChange(index, e.target.value)}
                     readOnly={!isEditing}
                   />
+                  {isEditing && (
+                    <>
+                      {/* Tampilkan tombol '+' hanya di baris terakhir */}
+                      {index === features.length - 1 && (
+                        <CButton
+                          type="button"
+                          className="btn-primary px-3"
+                          onClick={addFeatureField}
+                        >
+                          +
+                        </CButton>
+                      )}
+                      {/* Tampilkan tombol '-' jika ada lebih dari 1 feature */}
+                      {features.length > 1 && (
+                        <CButton
+                          type="button"
+                          color="danger"
+                          className="px-3"
+                          onClick={() => removeFeatureField(index)}
+                        >
+                          -
+                        </CButton>
+                      )}
+                    </>
+                  )}
                 </CInputGroup>
               ))}
             </CCol>

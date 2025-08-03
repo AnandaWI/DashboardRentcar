@@ -1,0 +1,29 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#map {
+  height: 80% !important;
+  width: 100% !important;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure Leaflet controls are visible */
+.leaflet-control-container {
+  z-index: 1000;
+}
+
+/* Fix for Leaflet tiles loading */
+.leaflet-tile-pane {
+  z-index: 1;
+}
+
+/* Ensure map container has proper dimensions */
+.leaflet-container {
+  height: 80% !important;
+  width: 100% !important;
+}

@@ -6,6 +6,7 @@ import DeleteButton from '../components/buttons/DeleteButton'
 import { useToast } from '../components/ToastManager'
 import axiosInstance from '../core/axiosInstance'
 import EditButton from '../components/buttons/EditButton'
+import ShowButton from '../components/buttons/ShowButton'
 
 const ManageService = () => {
   const [modalVisible, setModalVisible] = useState(false)
@@ -58,9 +59,7 @@ const ManageService = () => {
 
   const handleSuccess = () => {
     const message =
-      modalMode === 'edit'
-        ? 'Service berhasil diupdate'
-        : 'Service berhasil ditambahkan'
+      modalMode === 'edit' ? 'Service berhasil diupdate' : 'Service berhasil ditambahkan'
 
     setModalVisible(false)
     setSelectedId(null)
@@ -82,11 +81,7 @@ const ManageService = () => {
         item.images && item.images.length > 0 ? (
           <div className="d-flex gap-2">
             {item.images.map((image, index) => (
-              <CButton
-                key={index}
-                color="primary"
-                onClick={() => openPhotoModal(image.img_url)}
-              >
+              <CButton key={index} color="primary" onClick={() => openPhotoModal(image.img_url)}>
                 Lihat Foto {index + 1}
               </CButton>
             ))}
@@ -101,7 +96,6 @@ const ManageService = () => {
       render: (item) => (
         <div className="d-flex align-items-center gap-2">
           <DeleteButton onClick={() => openDeleteModal(item.id)} />
-        <EditButton onClick={() => openModal('edit', item.id)} />
         </div>
       ),
     },
@@ -166,7 +160,7 @@ const ManageService = () => {
           <CButton color="secondary" onClick={() => setDeleteModalVisible(false)}>
             Batal
           </CButton>
-          <CButton color="danger" className='text-white' onClick={handleDeleteConfirm}>
+          <CButton color="danger" className="text-white" onClick={handleDeleteConfirm}>
             Hapus
           </CButton>
         </CModalFooter>
